@@ -2,9 +2,6 @@ import { useRouter } from "next/router";
 import { createCookie, deleteCookie, getCookies } from "../utils/cookies";
 import { createRandomKey, encrypt, decrypt } from "../utils/crypto";
 
-// Configure your cookie time to live in seconds
-const cookieTtl = 5;
-
 export default function Home({ encryptionKey, error }) {
   const router = useRouter();
 
@@ -43,22 +40,28 @@ export async function getServerSideProps(context) {
   // Set a name for our cookie
   const cookieName = "EncryptionKey";
 
+  // Configure your cookie time to live in seconds
+  // Value is set low for testing.
+  // A normal value feels like an hour.
+  // But the length of time does not have an impact on security.
+  const cookieTtl = 5;
+
   // Set props to populate later
   const props = {};
 
-  // Get the encrypted email from query string
+  // Get the encrypted data from query string
   // It will only exist after user submit the form
-  const encryptedEmail = context?.query?.e;
+  const encryptedData = context?.query?.e;
 
   // When user submits the form,
   // it will send back the httpOnly cookie we set on page load.
-  const cookies = getCookies(context);
+  const cookies = getCookies({ context });
   const encryptionKeyFromCookie = cookies[cookieName];
 
-  if (encryptedEmail && encryptionKeyFromCookie) {
+  if (encryptedData && encryptionKeyFromCookie) {
     try {
-      // Decrypt the encrypted email using the encryption key from the httpOnly cookie
-      const email = decrypt(encryptedEmail, encryptionKeyFromCookie);
+      // Decrypt the encrypted data using the encryption key from the httpOnly cookie
+      const email = decrypt(encryptedData, encryptionKeyFromCookie);
       console.log({ email });
 
       // Delete the cookie.
@@ -80,7 +83,7 @@ export async function getServerSideProps(context) {
   }
 
   // The httpOnly cookie has expired
-  if (encryptedEmail && !encryptionKeyFromCookie) {
+  if (encryptedData && !encryptionKeyFromCookie) {
     props.error = "Try again";
   }
 

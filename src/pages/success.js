@@ -12,7 +12,7 @@ export default function Success() {
 export async function getServerSideProps(context) {
   // Get cookies as a test
   // There should not be any cookies after successful submittal of the form
-  const cookies = getCookies();
+  const cookies = getCookies({ context });
   console.log({ cookies });
   return { props: {} };
 }

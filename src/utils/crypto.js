@@ -1,20 +1,30 @@
 import { randomBytes, createDecipheriv } from "crypto";
 
+/**
+ * Create a random key for encryption
+ * @returns An encryption key in base64
+ */
 export const createRandomKey = () => {
   // Generate a random 256-bit key
   // Convert the key to a base64-encoded string
   return randomBytes(32).toString("base64");
 };
 
-export const encrypt = async (text, key) => {
+/**
+ * Written with the Web Crypto API for the browser.
+ * @param {String} str String to encrypt
+ * @param {String} base64Key The encryption key in base64
+ * @returns {String} The encrypted string
+ */
+export const encrypt = async (str, base64Key) => {
   // Convert the key from a base64 string to a Uint8Array
-  const keyBytes = Uint8Array.from(atob(key), (c) => c.charCodeAt(0));
+  const keyBytes = Uint8Array.from(atob(base64Key), (c) => c.charCodeAt(0));
 
   // Generate a random initialization vector
   const iv = window.crypto.getRandomValues(new Uint8Array(16));
 
   // Convert the text to be encrypted to a Uint8Array
-  const textBytes = new TextEncoder().encode(text);
+  const textBytes = new TextEncoder().encode(str);
 
   // Define the encryption algorithm
   const algorithm = {
@@ -53,9 +63,15 @@ export const encrypt = async (text, key) => {
   return `${ivHex}:${cipherTextHex}`;
 };
 
-export const decrypt = (cipherText, base64Key) => {
+/**
+ * Written with Node.js crypto module for the server.
+ * @param {String} encryptedString The encrypted string
+ * @param {String} base64Key The encryption key in base64
+ * @returns {String} The decrypted string
+ */
+export const decrypt = (encryptedString, base64Key) => {
   // Split the input into the IV and the cipher text
-  const [ivHex, cipherTextHex] = cipherText.split(":");
+  const [ivHex, cipherTextHex] = encryptedString.split(":");
 
   // Convert the IV and the cipher text from hex strings to buffers
   const iv = Buffer.from(ivHex, "hex");
